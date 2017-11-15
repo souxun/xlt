@@ -118,6 +118,7 @@ $this->registerJs($js);
 Modal::end();
 
 ?>
+
 <?php $this->beginBlock('deliver') ?>
     $(function($) {
 		$(".deliver").on('click',function(){

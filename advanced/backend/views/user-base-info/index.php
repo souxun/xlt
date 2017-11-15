@@ -2,7 +2,9 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\bootstrap\Modal;
 use \yii\helpers\Url;
+
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\UserBaseInfoSearch */
@@ -17,12 +19,20 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
         <?= Html::button('导出EXCEL', ['id'=>'load_excel','class' => 'btn btn-success']) ?>&nbsp;
         <?= Html::a('直推A级营销总监Top100', ['user-base-info/top100'], ['class' => 'btn btn-success']) ?>
-
+        <?=
+        Html::a('创建栏目', ['create'], [
+            'class' => 'btn btn-success',
+            'id' => 'create', // 按钮的id随意
+            'data-toggle' => 'modal', // 固定写法
+            'data-target' => '#operate-modal', // 等于modal begin中设定的参数id值
+        ])
+        ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
+            
 //            'id',
 
             'user_id',
@@ -69,6 +79,47 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     </table>
 </div>
+<?php
+Modal::begin([
+    'id' => 'operate-modal',
+    'header' => '<h4 class="modal-title"></h4>',
+]);
+Modal::end();
+?>
+<?php
+
+// 异步请求的地址
+$requestCreateUrl = Url::toRoute('create');
+$js = <<<JS
+// 创建操作
+$('#create').on('click', function () {
+    $('.modal-title').html('创建栏目');
+    $.get('{$requestCreateUrl}',
+        function (data) {    
+            // 弹窗的主题渲染页面
+            $('.modal-body').html(data);
+        }  
+    );
+});
+JS;
+$this->registerJs($js);
+?>
+<?php
+// 更新
+$requestUpdateUrl = Url::toRoute('update');
+$js = <<<JS
+    // 更新操作
+    $('.btn-update').on('click', function () {
+        $('.modal-title').html('栏目信息');
+        $.get('{$requestUpdateUrl}', { id: $(this).closest('tr').data('key') },
+            function (data) {
+                $('.modal-body').html(data);
+            }  
+        );
+    });
+JS;
+$this->registerJs($js);
+?>
 <?php $this->beginBlock('confirm') ?>
     $(function($) {
 
